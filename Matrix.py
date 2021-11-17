@@ -2,11 +2,22 @@ import random
 import time
 import numpy as np
 
-elements = [1/9, 1/8, 1/7, 1/6, 1/5, 1/4, 1/3, 1/2,
-            1, 2, 3, 4, 5, 6, 7, 8, 9]
+#  ┌───────────────────────────────────────────────┐
+#  │        Analytic hierarchy process (AHP)       │
+#  │        Solve index of random agreement        │
+#  │───────────────────────────────────────────────┤
+#  │ n: 11x11, 12x12, ..., 20x20                   │
+#  │ matrix: aji = 1/aij                           │
+#  │ elements: 1/9, 1/8, 1/7,...,1, 2, 3, ..., 9   │
+#  │ λi,max: i=1,2,...,1000000                     │
+#  │ RI=(λ*-n)/(n-1)                               │
+#  └───────────────────────────────────────────────┘
 
 
 def lambda_max(matrix_size):
+
+    elements = [1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5, 1 / 4, 1 / 3, 1 / 2,
+                1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     matrix = np.array([[random.choice(elements) for i in range(matrix_size)] for j in range(matrix_size)])
     inverse_matrix = np.divide(1, matrix).T
@@ -26,48 +37,34 @@ def lambda_max(matrix_size):
     return lambda_max
 
 
-#  ┌───────────────────────────────────────────────┐
-#  │        Analytic hierarchy process (AHP)       │
-#  │        Solve index of random agreement        │
-#  │───────────────────────────────────────────────┤
-#  │ n: 11x11, 12x12, ..., 20x20                   │
-#  │ matrix: aji = 1/aij                           │
-#  │ elements: 1/9, 1/8, 1/7,...,1, 2, 3, ..., 9   │
-#  │ λi,max: i=1,2,...,1000000                     │
-#  │ RI=(λ*-n)/(n-1)                               │
-#  └───────────────────────────────────────────────┘
+def index_random_agreement(min_matrix_size, max_matrix_size, steps_number):
 
-def main():
-
-    start = time.time()
     result = []
-    steps_number = 1000000
-    min_matrix_size = 11
-    max_matrix_size = 20
 
     for matrix_size in range(min_matrix_size, max_matrix_size + 1):
-
+        start_loop = time.time()
         lambda_max_array = np.array([])
-
         for sn in range(steps_number):
             lambda_max_array = np.append(lambda_max_array, lambda_max(matrix_size))
-
         lambda_max_mean = np.mean(lambda_max_array)
         random_index = (lambda_max_mean - matrix_size) / (matrix_size - 1)
         result += [[matrix_size, np.round(lambda_max_mean, 4), np.round(random_index, 4)]]
         end_loop = time.time()
-        print(f"Solve {matrix_size}x{matrix_size} loop: {np.round((end_loop - start), 4)}s")
+        print(f"Solve {matrix_size}x{matrix_size} loop: {np.round((end_loop - start_loop), 4)}s")
 
-    end = time.time()
-    print(f"Solve: {np.round((end - start), 4)}s")
     print(f"[n,  λ* ,  RI]")
     for res in result:
         print(res)
     print()
 
+    return result
+
 
 if __name__ == '__main__':
-    main()
+    start = time.time()
+    index_random_agreement(11, 20, 100000)
+    end = time.time()
+    print(f"Solve: {np.round((end - start), 4)}s")
 
 # OUT
 # ['n', ' λ* ', ' RI ']
