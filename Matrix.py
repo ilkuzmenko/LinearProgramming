@@ -1,48 +1,30 @@
-import numpy as np
 import random
 import time
+import numpy as np
+
+elements = [1/9, 1/8, 1/7, 1/6, 1/5, 1/4, 1/3, 1/2,
+            1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-class Matrix:
+def lambda_max(matrix_size):
 
-    def __init__(self, nxn):
-        self.n = nxn
-        self.elements = [1/9, 1/8, 1/7, 1/6, 1/5, 1/4, 1/3, 1/2,
-                         1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.matrix = np.array(self.create_matrix())
+    matrix = np.array([[random.choice(elements) for i in range(matrix_size)] for j in range(matrix_size)])
+    inverse_matrix = np.divide(1, matrix).T
+    matrix = np.add(np.tril(matrix), np.triu(inverse_matrix))
+    np.fill_diagonal(matrix, 1)
+    # print(matrix, ' < = matrix')
+    own_vec = np.power(np.prod(matrix, axis=1), 1 / matrix_size)
+    # print(own_vec, ' < = own_vec')
+    own_vec_sum = np.sum(own_vec, axis=0)
+    # print(own_vec_sum, ' < = own_vec_sum')
+    own_vec_norm = np.divide(own_vec, own_vec_sum)
+    # print(own_vec_norm, ' < = own_vec_norm')
+    matrix_sum = np.sum(matrix, axis=0)
+    # print(matrix_sum, '< = matrix_sum')
+    lambda_max = sum(np.multiply(matrix_sum, own_vec_norm.T))
+    # print([lambda_max], ' < = lambda_max')
+    return lambda_max
 
-    def create_matrix(self):
-
-        matrix = np.empty((self.n, self.n))
-        matrix[:] = np.nan
-        np.fill_diagonal(matrix, 1)
-
-        for j in range(len(matrix)):
-            for i in range(len(matrix)):
-                if j < i:
-                    matrix[j][i] = random.choice(self.elements)
-                if matrix[i][j] < 1 or matrix[i][j] > 1:
-                    matrix[j][i] = 1 / matrix[i][j]
-                elif matrix[i][j] == 1:
-                    matrix[j][i] = 1
-
-        return matrix
-
-    def lambda_max(self):
-
-        matrix = self.matrix
-        print(matrix, ' < = matrix')
-        own_vec = np.power(np.prod(matrix, axis=1), 1/self.n)
-        print(own_vec, ' < = own_vec')
-        own_vec_sum = np.sum(own_vec, axis=0)
-        print(own_vec_sum, ' < = own_vec_sum')
-        own_vec_norm = np.divide(own_vec, own_vec_sum)
-        print(own_vec_norm, ' < = own_vec_norm')
-        matrix_sum = np.sum(matrix, axis=0)
-        print(matrix_sum, '< = matrix_sum')
-        lambda_max = sum(np.multiply(matrix_sum, own_vec_norm.T))
-        print([lambda_max], ' < = lambda_max')
-        return lambda_max
 
 #  ┌───────────────────────────────────────────────┐
 #  │        Analytic hierarchy process (AHP)       │
@@ -54,32 +36,38 @@ class Matrix:
 #  │ λi,max: i=1,2,...,1000000                     │
 #  │ RI=(λ*-n)/(n-1)                               │
 #  └───────────────────────────────────────────────┘
-if __name__ == '__main__':
+
+def main():
+
     start = time.time()
     result = []
+    steps_number = 1000000
+    min_matrix_size = 11
+    max_matrix_size = 20
 
-    for n in range(11, 21):
+    for matrix_size in range(min_matrix_size, max_matrix_size + 1):
 
-        lmax = np.array([])
-        for k in range(1):
+        lambda_max_array = np.array([])
 
-            m = Matrix(n)
-            lam_max = Matrix.lambda_max(m)
-            lmax = np.append(lmax, lam_max)
+        for sn in range(steps_number):
+            lambda_max_array = np.append(lambda_max_array, lambda_max(matrix_size))
 
-        l_max_mean = np.mean(lmax)
-        ri = (l_max_mean - n) / (n - 1)
-        result += [[n, np.round(l_max_mean, 5), np.round(ri, 5)]]
+        lambda_max_mean = np.mean(lambda_max_array)
+        random_index = (lambda_max_mean - matrix_size) / (matrix_size - 1)
+        result += [[matrix_size, np.round(lambda_max_mean, 4), np.round(random_index, 4)]]
         end_loop = time.time()
-        print(f"Solve {n}x{n} loop: {np.round((end_loop - start), 5)}s")
+        print(f"Solve {matrix_size}x{matrix_size} loop: {np.round((end_loop - start), 4)}s")
 
     end = time.time()
-    print(f"Solve: {np.round((end - start), 5)}s")
-    print(f"n,  λ* ,  RI")
+    print(f"Solve: {np.round((end - start), 4)}s")
+    print(f"[n,  λ* ,  RI]")
     for res in result:
         print(res)
     print()
 
+
+if __name__ == '__main__':
+    main()
 
 # OUT
 # ['n', ' λ* ', ' RI ']
