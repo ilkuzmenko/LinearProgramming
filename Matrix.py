@@ -42,16 +42,18 @@ def index_random_agreement(min_matrix_size, max_matrix_size, steps_number):
     result = []
 
     for matrix_size in range(min_matrix_size, max_matrix_size + 1):
+
         start_loop = time.time()
-        lambda_max_array = np.array([])
-        for sn in range(steps_number):
-            lambda_max_array = np.append(lambda_max_array, lambda_max(matrix_size))
+        lambda_max_array = np.array([[lambda_max(matrix_size) for sn in range(steps_number)]])
         lambda_max_mean = np.mean(lambda_max_array)
+        # print([lambda_max_mean], ' < = lambda_max_mean')
         random_index = (lambda_max_mean - matrix_size) / (matrix_size - 1)
+        # print([random_index], ' < = random_index')
         result += [[matrix_size, np.round(lambda_max_mean, 4), np.round(random_index, 4)]]
         end_loop = time.time()
         print(f"Solve {matrix_size}x{matrix_size} loop: {np.round((end_loop - start_loop), 4)}s")
 
+    print()
     print(f"[n,  λ* ,  RI]")
     for res in result:
         print(res)
@@ -62,20 +64,39 @@ def index_random_agreement(min_matrix_size, max_matrix_size, steps_number):
 
 if __name__ == '__main__':
     start = time.time()
-    index_random_agreement(11, 20, 100000)
+
+    index_random_agreement(11, 20, 1000000)
+
     end = time.time()
-    print(f"Solve: {np.round((end - start), 4)}s")
+    mon, sec = divmod((end - start), 60)
+    hr, mon = divmod(mon, 60)
+    print("Solve: %d:%02d:%02d" % (hr, mon, sec))
 
 # OUT
-# ['n', ' λ* ', ' RI ']
-# [11, 24.60647, 1.36065]
-# [12, 27.31162, 1.39197]
-# [13, 30.02013, 1.41834]
-# [14, 32.74322, 1.44179]
-# [15, 35.46454, 1.46175]
-# [16, 38.18875, 1.47925]
-# [17, 40.92302, 1.49519]
-# [18, 43.65586, 1.50917]
-# [19, 46.39292, 1.52183]
-# [20, 49.12756, 1.53303]
+
+# Solve 11x11 loop: 99.193s
+# Solve 12x12 loop: 110.302s
+# Solve 13x13 loop: 121.028s
+# Solve 14x14 loop: 133.164s
+# Solve 15x15 loop: 145.49s
+# Solve 16x16 loop: 158.946s
+# Solve 17x17 loop: 173.611s
+# Solve 18x18 loop: 189.103s
+# Solve 19x19 loop: 204.907s
+# Solve 20x20 loop: 221.614s
+#
+# [n,  λ* ,  RI]
+# [11, 24.6058, 1.3606]
+# [12, 27.309, 1.3917]
+# [13, 30.0255, 1.4188]
+# [14, 32.7422, 1.4417]
+# [15, 35.4659, 1.4618]
+# [16, 38.1927, 1.4795]
+# [17, 40.9223, 1.4951]
+# [18, 43.6564, 1.5092]
+# [19, 46.3925, 1.5218]
+# [20, 49.1256, 1.5329]
+#
+# Solve: 0:25:57
+#
 # Process finished with exit code 0
